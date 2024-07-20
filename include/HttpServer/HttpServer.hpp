@@ -6,6 +6,8 @@
 #include <HttpServer/DefaultMiddlewares.hpp>
 #include <memory>
 
+#define ERROR_USING_TWO_LOGGERS "Not using base logger and custom logger."
+
 namespace asio = boost::asio;
 using tcp = asio::ip::tcp;
 
@@ -13,25 +15,15 @@ namespace Kepler
 {
     class HttpServer {
     public:
-        HttpServer(asio::io_context& ioc, uint16_t port, Router& router)
-            : acceptor(ioc, tcp::endpoint(tcp::v4(), port)), router(router) {}
+        HttpServer(asio::io_context& ioc, const asio::ip::address_v4& address, uint16_t port, Router& router)
+            : acceptor(ioc, tcp::endpoint(address, port)), router(router) {}
 
-        HttpServer& setLogger(bool enable) {
-            if (enable) {
-                logger = std::make_shared<Logger::Logging>("Kepler.log", "10mb");
-                logThread = std::thread(&Logger::Logging::processLogBuffer, logger.get());
-                default_middlewares = std::make_shared<DefaultMiddlewares>(*logger);
-                // router.use(default_middlewares->getLogMiddleware());
-                router.use(std::bind(&DefaultMiddlewares::logMiddleware, default_middlewares.get(), std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-            }
-            this->useLogger = enable;
-            return *this;
-        }
+        HttpServer& useBaseLogger();
 
-        HttpServer& listen() {
-            do_accept();
-            return *this;
-        }
+        HttpServer& useCustomLogger(Middleware::MiddlewareFunction log_middleware);
+
+
+        HttpServer& listen();
 
     private:
         void do_accept() {
@@ -45,7 +37,8 @@ namespace Kepler
                 });
         }
 
-        bool useLogger = false;
+        bool setBaseLogger = false;
+        bool setCustomLogger = false;
         tcp::acceptor acceptor;
         Router& router;
         std::shared_ptr<Logger::Logging> logger;

@@ -16,13 +16,7 @@ namespace Kepler
         std::string target() const { return target_; }
         std::string body() const { return body_; }
 
-        std::unordered_map<std::string, std::string> headers() const {
-            std::unordered_map<std::string, std::string> result;
-            for (const auto& field : headers_) {
-                result[field.name_string()] = field.value();
-            }
-            return result;
-        }
+        std::unordered_map<std::string, std::string> headers() const;
 
     private:
         http::verb method_;

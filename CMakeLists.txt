@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.18)
+
 project(Kepler)
 
 set(CMAKE_CXX_STANDARD 20)
+
 include(FetchContent)
 # Fetch nghttp2-asio
 # FetchContent_Declare(
@@ -35,17 +37,33 @@ FetchContent_Declare(fmt
 # endif()
 FetchContent_MakeAvailable(fmt)
 
+set (Boost_NO_SYSTEM_PATHS ON)
+set (Boost_USE_MULTITHREADED ON)
+set (Boost_USE_STATIC_LIBS ON)
+# set (Boost_USE_STATIC_RUNTIME ON)
+set (BOOST_ALL_DYN_LINK OFF)
+# set(BOOST_INCLUDEDIR "/usr/local/include/boost/")
+# set(BOOST_LIBRARYDIR "/usr/local/lib/")
 find_package(Boost REQUIRED COMPONENTS system json)
-find_package(OpenSSL REQUIRED)
+# find_package(OpenSSL REQUIRED)
 
-include_directories(${Boost_INCLUDE_DIRS} ${OPENSSL_INCLUDE_DIR})
+include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-add_executable(Kepler src/main.cpp)
+add_executable(Kepler 
+  src/HttpServer/DefaultMiddlewares.cpp
+  src/HttpServer/HttpRequest.cpp
+  src/HttpServer/HttpResponse.cpp
+  src/HttpServer/HttpServer.cpp
+  src/HttpServer/Middleware.cpp
+  src/HttpServer/Router.cpp
+  src/HttpServer/Session.cpp
+  src/main.cpp
+)
 target_link_libraries(Kepler 
   ${Boost_LIBRARIES}
-  OpenSSL::SSL
-  OpenSSL::Crypto
+  # OpenSSL::SSL
+  # OpenSSL::Crypto
   Logger
   fmt
   # nghttp2_asio

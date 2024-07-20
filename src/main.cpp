@@ -48,10 +48,13 @@ int main(int argc, char *argv[])
         router.post("/post", handle_post);
         router.get("/hello", handle_hello);
 
-        Kepler::HttpServer http_server(ioc, port, router);
+        // Kepler::HttpServer http_server(ioc, port, router);
+        asio::ip::address_v4 address = asio::ip::make_address_v4("0.0.0.0");
+// uint16_t port = 8080;
+        Kepler::HttpServer http_server(ioc, address, port, router);
 
         // Enable logger middleware
-        http_server.listen().setLogger(true);
+        http_server.listen().useBaseLogger();
 
         std::vector<std::thread> v;
         v.reserve(num_threads);

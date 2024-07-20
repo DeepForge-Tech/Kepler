@@ -10,27 +10,12 @@ namespace Kepler
     public:
         using MiddlewareFunction = std::function<void(const HttpRequest&, HttpResponse&, std::function<void()>)>;
 
-        // Middleware() : logger(logger) {}
+        void add(MiddlewareFunction middleware);
 
-        void add(MiddlewareFunction middleware) {
-            middlewares.push_back(std::move(middleware));
-        }
-
-        void handle(const HttpRequest& req, HttpResponse& res, std::function<void()> next) const {
-            index = 0;
-            do_handle(req, res, next);
-        }
+        void handle(const HttpRequest& req, HttpResponse& res, std::function<void()> next) const;
 
     private:
-        void do_handle(const HttpRequest& req, HttpResponse& res, std::function<void()> next) const {
-            if (index < middlewares.size()) {
-                middlewares[index++](req, res, [this, &req, &res, next] {
-                    do_handle(req, res, next);
-                });
-            } else {
-                next();
-            }
-        }
+        void do_handle(const HttpRequest& req, HttpResponse& res, std::function<void()> next) const;
 
         mutable size_t index = 0;
         std::vector<MiddlewareFunction> middlewares;
