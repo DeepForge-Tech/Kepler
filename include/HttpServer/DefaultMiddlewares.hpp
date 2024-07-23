@@ -11,20 +11,21 @@ namespace Kepler
     {
     public:
         DefaultMiddlewares(Logger::Logging &logger)
-            : logger(logger), logThread(&Logger::Logging::processLogBuffer, &logger) {}
+            : logger(logger), logThread(&Logger::Logging::processFormattedLogBuffer, &logger) {}
 
         ~DefaultMiddlewares()
         {
-            logger.setFinished(true); // Устанавливаем флаг завершения для потока
-            logger.notifyBuffer();    // Пробуждаем поток для завершения
+            logger.setFinished(true); // Set the end flag for a thread
+            logger.notifyBuffer();    // Waking up the thread to complete
             if (logThread.joinable())
             {
-                logThread.join(); // Ожидание завершения потока
+                logThread.join(); // Waiting for thread to complete
             }
         }
 
-        void logMiddleware(const HttpRequest &req, HttpResponse &res, std::function<void()> next) const;
+        virtual void logMiddleware(const HttpRequest &req, HttpResponse &res, std::function<void()> next) const;
 
+        virtual void corsMiddleware(const HttpRequest& req, HttpResponse& res, std::function<void()> next) const;
 
     private:
         

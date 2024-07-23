@@ -4,19 +4,16 @@ project(Kepler)
 
 set(CMAKE_CXX_STANDARD 20)
 
+# option(BUILD_SHARED_LIBS "Build using shared libraries" OFF)
+option(USE_HTTP "Use libraries for HTTP" ON)
+option(BUILD_EXAMPLES "Build examples" ON)
 include(FetchContent)
-# Fetch nghttp2-asio
-# FetchContent_Declare(
-#   nghttp2_asio
-#   GIT_REPOSITORY https://github.com/nghttp2/nghttp2-asio.git
-#   GIT_TAG main  # Вы можете изменить версию, если требуется
-# )
-# FetchContent_MakeAvailable(nghttp2_asio)
 
 # Logger
 FetchContent_Declare(Logger
   GIT_REPOSITORY https://github.com/DeepForge-Tech/Logger.git
   GIT_TAG master
+  GIT_SHALLOW 1
 )
 # if(NOT Logger_POPULATED)
 #   FetchContent_Populate(Logger)
@@ -29,6 +26,7 @@ FetchContent_MakeAvailable(Logger)
 FetchContent_Declare(fmt
   GIT_REPOSITORY https://github.com/DeepForge-Technology/fmt.git
   GIT_TAG master
+  GIT_SHALLOW 1
 )
 # if(NOT fmt_POPULATED)
 #   FetchContent_Populate(fmt)
@@ -37,34 +35,51 @@ FetchContent_Declare(fmt
 # endif()
 FetchContent_MakeAvailable(fmt)
 
-set (Boost_NO_SYSTEM_PATHS ON)
-set (Boost_USE_MULTITHREADED ON)
-set (Boost_USE_STATIC_LIBS ON)
-# set (Boost_USE_STATIC_RUNTIME ON)
-set (BOOST_ALL_DYN_LINK OFF)
-# set(BOOST_INCLUDEDIR "/usr/local/include/boost/")
-# set(BOOST_LIBRARYDIR "/usr/local/lib/")
-find_package(Boost REQUIRED COMPONENTS system json)
-# find_package(OpenSSL REQUIRED)
-
-include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-add_executable(Kepler 
-  src/HttpServer/DefaultMiddlewares.cpp
-  src/HttpServer/HttpRequest.cpp
-  src/HttpServer/HttpResponse.cpp
-  src/HttpServer/HttpServer.cpp
-  src/HttpServer/Middleware.cpp
-  src/HttpServer/Router.cpp
-  src/HttpServer/Session.cpp
-  src/main.cpp
-)
+set(SOURCE_FILES)
+
+message("Use libraries for HTTP - ${USE_HTTP}")
+if (USE_HTTP)
+  
+  set (Boost_NO_SYSTEM_PATHS ON)
+  set (Boost_USE_MULTITHREADED ON)
+  set (Boost_USE_STATIC_LIBS ON)
+  set (BOOST_ALL_DYN_LINK OFF)
+  find_package(Boost REQUIRED COMPONENTS system json)
+
+  include_directories(${Boost_INCLUDE_DIRS})
+  list(APPEND SOURCE_FILES
+    src/HttpServer/DefaultMiddlewares.cpp
+    src/HttpServer/HttpRequest.cpp
+    src/HttpServer/HttpResponse.cpp
+    src/HttpServer/HttpServer.cpp
+    src/HttpServer/Middleware.cpp
+    src/HttpServer/Router.cpp
+    src/HttpServer/Session.cpp
+  )
+endif()
+
+# if (BUILD_SHARED_LIBS)
+#     add_library(Kepler SHARED
+#       ${SOURCE_FILES}
+#       # src/main.cpp
+#     )
+# else()
+    add_library(Kepler STATIC
+      ${SOURCE_FILES}
+    )
+# endif()
+# set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+# set_property(TARGET Kepler PROPERTY POSITION_INDEPENDENT_CODE ON)
 target_link_libraries(Kepler 
-  ${Boost_LIBRARIES}
-  # OpenSSL::SSL
-  # OpenSSL::Crypto
-  Logger
-  fmt
-  # nghttp2_asio
-)
+    ${Boost_LIBRARIES}
+    Logger
+    fmt
+  )
+# find_package(OpenSSL REQUIRED)
+# OpenSSL::SSL
+# OpenSSL::Crypto
+
+# Build examples
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/examples)
