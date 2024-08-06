@@ -1,43 +1,19 @@
 cmake_minimum_required(VERSION 3.18)
-
+if (WIN32)
+set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
+endif()
 project(Kepler)
 
 set(CMAKE_CXX_STANDARD 20)
 
 # option(BUILD_SHARED_LIBS "Build using shared libraries" OFF)
 option(USE_HTTP "Use libraries for HTTP" ON)
-option(BUILD_EXAMPLES "Build examples" ON)
-include(FetchContent)
+option(KEPLER_BUILD_EXAMPLES "Build examples" ON)
 
-# Logger
-FetchContent_Declare(Logger
-  GIT_REPOSITORY https://github.com/DeepForge-Tech/Logger.git
-  GIT_TAG master
-  GIT_SHALLOW 1
-)
-# if(NOT Logger_POPULATED)
-#   FetchContent_Populate(Logger)
-
-#   add_subdirectory(${Logger_SOURCE_DIR} ${Logger_BINARY_DIR} EXCLUDE_FROM_ALL)
-# endif()
-FetchContent_MakeAvailable(Logger)
-
-# fmt
-FetchContent_Declare(fmt
-  GIT_REPOSITORY https://github.com/DeepForge-Technology/fmt.git
-  GIT_TAG master
-  GIT_SHALLOW 1
-)
-# if(NOT fmt_POPULATED)
-#   FetchContent_Populate(fmt)
-
-#   add_subdirectory(${fmt_SOURCE_DIR} ${fmt_BINARY_DIR} EXCLUDE_FROM_ALL)
-# endif()
-FetchContent_MakeAvailable(fmt)
-
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/DownloadDependecies.cmake)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-set(SOURCE_FILES)
+set(HTTP_SERVER_SOURCE_FILES)
 
 message("Use libraries for HTTP - ${USE_HTTP}")
 if (USE_HTTP)
@@ -49,7 +25,7 @@ if (USE_HTTP)
   find_package(Boost REQUIRED COMPONENTS system json)
 
   include_directories(${Boost_INCLUDE_DIRS})
-  list(APPEND SOURCE_FILES
+  list(APPEND HTTP_SERVER_SOURCE_FILES
     src/HttpServer/DefaultMiddlewares.cpp
     src/HttpServer/HttpRequest.cpp
     src/HttpServer/HttpResponse.cpp
@@ -62,13 +38,17 @@ endif()
 
 # if (BUILD_SHARED_LIBS)
 #     add_library(Kepler SHARED
-#       ${SOURCE_FILES}
+#       ${HTTP_SERVER_SOURCE_FILES}
 #       # src/main.cpp
 #     )
 # else()
-    add_library(Kepler STATIC
-      ${SOURCE_FILES}
-    )
+add_library(Kepler SHARED
+  ${HTTP_SERVER_SOURCE_FILES}
+)
+
+add_library(Kepler_static STATIC
+  ${HTTP_SERVER_SOURCE_FILES}
+)
 # endif()
 # set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 # set_property(TARGET Kepler PROPERTY POSITION_INDEPENDENT_CODE ON)
@@ -82,4 +62,6 @@ target_link_libraries(Kepler
 # OpenSSL::Crypto
 
 # Build examples
+if (KEPLER_BUILD_EXAMPLES)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/examples)
+endif()
