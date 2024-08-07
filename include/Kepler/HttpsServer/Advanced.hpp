@@ -1,10 +1,10 @@
-#include <iostream>
+#ifndef ADVANCED_HTTPS_SERVER_HPP
+#define ADVANCED_HTTPS_SERVER_HPP
+
+#include <Kepler/General.hpp>
 #include <memory>
 #include <thread>
-#include <vector>
 #include <functional>
-#include <string>
-#include <unordered_map>
 #include <boost/asio.hpp>
 #include <boost/beast.hpp>
 #include <boost/json.hpp>
@@ -14,3 +14,5 @@
 #include <boost/beast/version.hpp>
 #include <boost/asio/ssl.hpp>
 #include <boost/config.hpp>
+
+#endif

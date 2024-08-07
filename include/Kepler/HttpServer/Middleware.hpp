@@ -1,8 +1,8 @@
 #ifndef MIDDLEWARE_HPP
 #define MIDDLEWARE_HPP
 
-#include <HttpServer/HttpRequest.hpp>
-#include <HttpServer/HttpResponse.hpp>
+#include <Kepler/HttpServer/HttpRequest.hpp>
+#include <Kepler/HttpServer/HttpResponse.hpp>
 
 namespace Kepler
 {

@@ -4,7 +4,10 @@ set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
 endif()
 project(Kepler)
 
+
 set(CMAKE_CXX_STANDARD 20)
+include(GNUInstallDirs)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # option(BUILD_SHARED_LIBS "Build using shared libraries" OFF)
 option(USE_HTTP "Use libraries for HTTP" ON)
@@ -35,6 +38,16 @@ if (USE_HTTP)
     src/HttpServer/Session.cpp
   )
 endif()
+
+if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    set(CMAKE_CXX_FLAGS_DEBUG
+            "/DWIN32 /D_WINDOWS /EHsc /WX /wd4355 /wd4251 /wd4250 /wd4996 /FS"
+            CACHE STRING "Debug compiler flags" FORCE
+    )
+else ()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_CXX_FLAGS} -I /usr/local/include -I ../../include -DCURL_STATICLIB -Bstatic")
+endif ()
 
 # if (BUILD_SHARED_LIBS)
 #     add_library(Kepler SHARED

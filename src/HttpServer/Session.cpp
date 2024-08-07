@@ -1,8 +1,16 @@
-#include <HttpServer/Session.hpp>
+#include <Kepler/HttpServer/Session.hpp>
 
 void Kepler::Session::start()
 { 
     do_read(); 
+}
+
+void Kepler::Session::setHeaders(http::response<http::string_body> &response, std::unordered_map<std::string,std::string> headers)
+{
+    for (const auto &element : headers)
+    {
+        response.set(element.first,element.second);
+    }
 }
 
 void Kepler::Session::do_read()
@@ -26,6 +34,7 @@ void Kepler::Session::send_response(const HttpResponse& res)
             response.result(res.status());
             response.body() = res.body();
             response.prepare_payload();
+            setHeaders(response,res.headers());
             http::async_write(socket, response,
                 [this, self](beast::error_code ec, std::size_t) {
                     socket.shutdown(tcp::socket::shutdown_send, ec);

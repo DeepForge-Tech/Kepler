@@ -20,7 +20,7 @@ namespace Kepler
     {
     public:
         template <typename DataType>
-        boost::asio::awaitable<Json::Value> sendPostRequest(const DataType &data);
+        boost::asio::awaitable<Json::Value> sendPostRequest(const DataType &urlParts,const DataType &data);
 
         // template <typename DataType>
         HttpClient &setConnectionData(DB::HashedDatabaseValues &connection_data);

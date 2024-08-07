@@ -1,9 +1,9 @@
 #ifndef SESSION_HPP
 #define SESSION_HPP
 
-#include <HttpServer/HttpRequest.hpp>
-#include <HttpServer/HttpResponse.hpp>
-#include <HttpServer/Router.hpp>
+#include <Kepler/HttpServer/HttpRequest.hpp>
+#include <Kepler/HttpServer/HttpResponse.hpp>
+#include <Kepler/HttpServer/Router.hpp>
 
 namespace asio = boost::asio;
 namespace beast = boost::beast;
@@ -22,6 +22,8 @@ namespace Kepler
 
     private:
         void do_read();
+
+        void setHeaders(http::response<http::string_body> &response, std::unordered_map<std::string,std::string> headers);
 
         void send_response(const HttpResponse& res);
 

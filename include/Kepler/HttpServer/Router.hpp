@@ -1,9 +1,9 @@
 #ifndef ROUTER_HPP
 #define ROUTER_HPP
 
-#include <HttpServer/HttpRequest.hpp>
-#include <HttpServer/HttpResponse.hpp>
-#include <HttpServer/Middleware.hpp>
+#include <Kepler/HttpServer/HttpRequest.hpp>
+#include <Kepler/HttpServer/HttpResponse.hpp>
+#include <Kepler/HttpServer/Middleware.hpp>
 
 using RequestHandler = std::function<void(const Kepler::HttpRequest&, Kepler::HttpResponse&)>;
 

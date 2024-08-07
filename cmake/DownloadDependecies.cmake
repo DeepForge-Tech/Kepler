@@ -25,3 +25,16 @@ FetchContent_Declare(fmt
 #   add_subdirectory(${fmt_SOURCE_DIR} ${fmt_BINARY_DIR} EXCLUDE_FROM_ALL)
 # endif()
 FetchContent_MakeAvailable(fmt)
+
+# cppcoro
+FetchContent_Declare(cppcoro
+  GIT_REPOSITORY https://github.com/DeepForge-Tech/cppcoro.git
+  GIT_TAG main
+  GIT_SHALLOW 1
+)
+# if(NOT fmt_POPULATED)
+#   FetchContent_Populate(fmt)
+
+#   add_subdirectory(${fmt_SOURCE_DIR} ${fmt_BINARY_DIR} EXCLUDE_FROM_ALL)
+# endif()
+FetchContent_MakeAvailable(cppcoro)

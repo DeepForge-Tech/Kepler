@@ -1,7 +1,7 @@
 #include <DatabaseAPI/HttpClient.hpp>
 
 template <typename DataType>
-boost::asio::awaitable<Json::Value> HttpClient::sendPostRequest(const DataType &data)
+boost::asio::awaitable<Json::Value> HttpClient::sendPostRequest(const DataType &urlParts,const DataType &data)
 {
     try
     {
@@ -15,7 +15,7 @@ boost::asio::awaitable<Json::Value> HttpClient::sendPostRequest(const DataType &
         Json::StreamWriterBuilder writer;
         std::string errs;
         uint16_t http_code;
-        DB::DefaultReturnType urlParts;
+        // DB::DefaultReturnType urlParts;
         // Prepare JSON data
 
         if (!connectionData.empty())
@@ -38,7 +38,7 @@ boost::asio::awaitable<Json::Value> HttpClient::sendPostRequest(const DataType &
         http::response<http::string_body> res;
         boost::asio::ip::tcp::socket socket(executor);
 
-        urlParts = co_await getUrlParts(connectionUrl);
+        // urlParts = co_await getUrlParts(connectionUrl);
 
         const auto results = co_await resolver.async_resolve(urlParts["host"], urlParts["port"], boost::asio::use_awaitable);
 
@@ -123,39 +123,8 @@ HttpClient &HttpClient::setJsonDataStr(const char *json_data_str)
     return *this;
 }
 
-boost::asio::awaitable<DB::DefaultReturnType> HttpClient::getUrlParts(const std::string &url)
-{
-    // std::string url = "https://34.56.255.123/execute";
-    DB::HashedDatabaseValues urlParts;
-    std::regex url_regex(R"((http|https)://([^:/]+):?(\d*)(/.*)?)");
-    std::smatch url_match_result;
-    std::string scheme;
-    std::string port;
-    try
-    {
-        if (std::regex_match(url, url_match_result, url_regex))
-        {
-            scheme = url_match_result[1];
-            port = url_match_result[3];
-            urlParts.insert(std::make_pair("scheme", scheme));
-            if (port.empty())
-            {
-                port = (scheme == "https") ? "443" : "80";
-            }
-            urlParts.insert(std::make_pair("port", port));
-            urlParts.insert(std::make_pair("host", url_match_result[2]));
-            urlParts.insert(std::make_pair("path", url_match_result[4]));
-        }
-    }
-    catch(std::exception &error)
-    {
-        throw std::runtime_error(fmt::format("HttpClient.getUrlParts.{}", error.what()));
-    }
-    co_return urlParts;
-}
-
-template boost::asio::awaitable<Json::Value> HttpClient::sendPostRequest<DB::HashedDatabaseValues>(const DB::HashedDatabaseValues &);
-template boost::asio::awaitable<Json::Value> HttpClient::sendPostRequest<DB::DatabaseValues>(const DB::DatabaseValues &);
+template boost::asio::awaitable<Json::Value> HttpClient::sendPostRequest<DB::HashedDatabaseValues>(const DB::HashedDatabaseValues &,const DB::HashedDatabaseValues &);
+template boost::asio::awaitable<Json::Value> HttpClient::sendPostRequest<DB::DatabaseValues>(const DB::DatabaseValues &,const DB::DatabaseValues &);
 
 // template HttpClient &HttpClient::setConnectionData<DB::HashedDatabaseValues>(DB::HashedDatabaseValues &);
 // template HttpClient &HttpClient::setConnectionData<DB::DatabaseValues>(DB::DatabaseValues &);
