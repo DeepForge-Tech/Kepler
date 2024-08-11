@@ -11,6 +11,8 @@
 #define FMT_HEADER_ONLY
 #include <fmt/format.h>
 #include <json/json.h>
+#include <cppcoro/task.hpp>
+#include <cppcoro/sync_wait.hpp>
 
 namespace Kepler
 {

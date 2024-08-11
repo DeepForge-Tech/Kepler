@@ -14,13 +14,14 @@ namespace Kepler
 {
     class HttpServer {
     public:
-        HttpServer(asio::io_context &ioc, const std::string address, Router &router, uint16_t port = 80)
+        HttpServer(asio::io_context &ioc, const std::string Address, Router &Router, uint16_t Port = 80)
             : acceptor(ioc, 
-                        tcp::endpoint(asio::ip::make_address_v4(address),port)), 
-                        router(router), 
+                        tcp::endpoint(asio::ip::make_address_v4(Address),Port)), 
+                        router(Router), 
                         ioc(ioc),
                         logger_ptr(nullptr),  // Initialize logger pointer
-                        default_middlewares_ptr(nullptr)  // Initialize default_middlewares pointer
+                        default_middlewares_ptr(nullptr),  // Initialize default_middlewares pointer
+                        port(Port)
         {}
 
         ~HttpServer()
@@ -51,7 +52,7 @@ namespace Kepler
         
         HttpServer& setLogSize(const std::string size);
 
-        void listen();
+        void listen(const uint8_t numThread);
 
         void start();
 
@@ -74,6 +75,7 @@ namespace Kepler
         bool setCors = false;
         uint8_t numThreads = 1;
         uint8_t maxThreads = std::thread::hardware_concurrency();
+        uint16_t port;
         std::string logSize = "1MB";
         std::string logPath = fmt::format("{}/MainLog.log",std::filesystem::current_path().generic_string());
         tcp::acceptor acceptor;

@@ -10,19 +10,32 @@
 #include <boost/asio/steady_timer.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/use_awaitable.hpp>
-#include <cppcoro/task.hpp>
-#include <cppcoro/sync_wait.hpp>
+#include <Kepler/HttpClient/HttpClient.hpp>
+#include <Kepler/HttpsClient/HttpsClient.hpp>
+#include <memory>
+#include <regex>
 
 namespace Kepler
 {
     class WebClient
     {
         public:
-            cppcoro::task<Kepler
+            template <typename DataType>
+            cppcoro::task<Json::Value> sendPostRequest(const std::string &url,DataType &data);
+            WebClient()
+            {
+                http_client_ptr = std::make_unique<HttpClient>();
+                https_client_ptr = std::make_unique<HttpsClient>();
+                http_client = http_client_ptr.get();
+                https_client = https_client_ptr.get();
+            }
         protected:
-            cppcoro::task<DB::DefaultReturnType> Kepler::WebClient::getUrlParts(const std::string &url)
+            cppcoro::task<HashMap> getUrlParts(const std::string &url);
         private:
-        HttpClient http_client;
+        std::unique_ptr<HttpClient> http_client_ptr;
+        std::unique_ptr<HttpsClient> https_client_ptr;
+        HttpClient *http_client;
+        HttpsClient *https_client;
     };
 }
 

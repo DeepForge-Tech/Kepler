@@ -1,9 +1,10 @@
 #include <Kepler/HttpServer/HttpServer.hpp>
 #include <Kepler/HttpServer/Router.hpp>
-#include <boost/json.hpp>
+// #include <boost/json.hpp>
+#include <json/json.h>
 #include <iostream>
 
-namespace json = boost::json;
+// namespace json = boost::json;
 
 void handle_root(const Kepler::HttpRequest &req, Kepler::HttpResponse &res)
 {
@@ -13,14 +14,16 @@ void handle_root(const Kepler::HttpRequest &req, Kepler::HttpResponse &res)
 
 void handle_json(const Kepler::HttpRequest &req, Kepler::HttpResponse &res)
 {
-    json::value jv = {{"message", "Hello, JSON!"}};
-    res.set_body(json::serialize(jv));
+    // json::value jv = {{"message", "Hello, JSON!"}};
+    Json::Value body;
+    body["message"] = "Hello, JSON!";
+    res.set_body(body.toStyledString());
 }
 
 void handle_post(const Kepler::HttpRequest &req, Kepler::HttpResponse &res)
 {
-    json::value jv = json::parse(req.body());
-    res.set_body(json::serialize(jv));
+    // json::value jv = json::parse(req.body());
+    res.set_body(req.body());
 }
 
 void handle_hello(const Kepler::HttpRequest &req, Kepler::HttpResponse &res)

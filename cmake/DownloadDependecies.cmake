@@ -38,3 +38,14 @@ FetchContent_Declare(cppcoro
 #   add_subdirectory(${fmt_SOURCE_DIR} ${fmt_BINARY_DIR} EXCLUDE_FROM_ALL)
 # endif()
 FetchContent_MakeAvailable(cppcoro)
+
+ # jsoncpp
+ FetchContent_Declare(jsoncpp
+ GIT_REPOSITORY https://github.com/DeepForge-Technology/jsoncpp.git
+ GIT_TAG master
+)
+# if(NOT jsoncpp_POPULATED)
+#   FetchContent_Populate(jsoncpp)
+#   add_subdirectory(${jsoncpp_SOURCE_DIR} ${jsoncpp_BINARY_DIR})
+# endif()
+FetchContent_MakeAvailable(jsoncpp)

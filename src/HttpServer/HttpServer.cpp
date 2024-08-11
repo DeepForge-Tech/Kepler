@@ -18,7 +18,7 @@ Kepler::HttpServer &Kepler::HttpServer::useBaseLogger()
 {
     if (!setLogger)
     {
-        setLogger = true ;
+        setLogger = true;
         logger_ptr = std::make_shared<Logger::Logging>(logPath.c_str(), logSize.c_str());
         logThread = std::thread(&Logger::Logging::processFormattedLogBuffer, logger_ptr.get());
     }
@@ -57,8 +57,17 @@ Kepler::HttpServer &Kepler::HttpServer::multithread()
     numThreads = maxThreads--;
     return *this;
 }
-void Kepler::HttpServer::listen()
+void Kepler::HttpServer::listen(const uint8_t numThread)
 {
+    std::string startInfo;
+    std::stringstream ss;
+    ss << std::this_thread::get_id();
+    std::string threadIdStr = std::move(ss.str());
+    if (setLogger)
+    {
+        startInfo = fmt::format("Thread {} started with id {}", std::to_string(numThread), threadIdStr);
+        logger_ptr->addLogToBuffer(Logger::info_label, startInfo, true);
+    }
     ioc.run();
 }
 
@@ -79,19 +88,21 @@ void Kepler::HttpServer::startMiddlewares()
 
 void Kepler::HttpServer::start()
 {
+    std::string startInfo;
     // Preparation
-    // if (setBaseLogger && setCustomLogger)
-    // {
-    //     throw std::logic_error(ERROR_USING_TWO_LOGGERS);
-    // }
     startMiddlewares();
     // Running server
     do_accept();
+    if (setLogger)
+    {
+        startInfo = fmt::format("Server started on port: {}", std::to_string(port));
+        logger_ptr->addLogToBuffer(Logger::info_label, startInfo, true);
+    }
     std::vector<std::thread> threads;
     threads.reserve(numThreads);
     for (int i = 0; i < numThreads; i++)
     {
-        threads.emplace_back(&Kepler::HttpServer::listen, this);
+        threads.emplace_back(&Kepler::HttpServer::listen, this, i + 1);
     }
 
     for (std::thread &t : threads)
@@ -99,6 +110,7 @@ void Kepler::HttpServer::start()
         if (t.joinable())
             t.join();
     }
+    std::cout << "Start" << std::endl;
 }
 
 Kepler::HttpServer &Kepler::HttpServer::useCors()

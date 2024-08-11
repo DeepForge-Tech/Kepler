@@ -1,7 +1,7 @@
-#include <DatabaseAPI/HttpClient.hpp>
+#include <Kepler/HttpClient/HttpClient.hpp>
 
 template <typename DataType>
-boost::asio::awaitable<Json::Value> HttpClient::sendPostRequest(const DataType &urlParts,const DataType &data)
+boost::asio::awaitable<Json::Value> Kepler::HttpClient::sendPostRequest(DataType &urlParts,DataType &data)
 {
     try
     {
@@ -99,32 +99,32 @@ boost::asio::awaitable<Json::Value> HttpClient::sendPostRequest(const DataType &
 }
 
 // template <typename DataType>
-HttpClient &HttpClient::setConnectionData(DB::HashedDatabaseValues &connection_data)
+Kepler::HttpClient &Kepler::HttpClient::setConnectionData(Kepler::HashMap &connection_data)
 {
     connectionData = std::move(connection_data);
     return *this;
 }
 
-HttpClient &HttpClient::setUrl(const char *connection_url)
+Kepler::HttpClient &Kepler::HttpClient::setUrl(const char *connection_url)
 {
     connectionUrl = std::move(connection_url);
     return *this;
 }
 
-HttpClient &HttpClient::setJsonQueryStr(const char *json_query_str)
+Kepler::HttpClient &Kepler::HttpClient::setJsonQueryStr(const char *json_query_str)
 {
     jsonQueryStr = std::move(json_query_str);
     return *this;
 }
 
-HttpClient &HttpClient::setJsonDataStr(const char *json_data_str)
+Kepler::HttpClient &Kepler::HttpClient::setJsonDataStr(const char *json_data_str)
 {
     jsonDataStr = std::move(json_data_str);
     return *this;
 }
 
-template boost::asio::awaitable<Json::Value> HttpClient::sendPostRequest<DB::HashedDatabaseValues>(const DB::HashedDatabaseValues &,const DB::HashedDatabaseValues &);
-template boost::asio::awaitable<Json::Value> HttpClient::sendPostRequest<DB::DatabaseValues>(const DB::DatabaseValues &,const DB::DatabaseValues &);
+template boost::asio::awaitable<Json::Value> Kepler::HttpClient::sendPostRequest<Kepler::HashMap >(Kepler::HashMap  &,Kepler::HashMap &);
+template boost::asio::awaitable<Json::Value> Kepler::HttpClient::sendPostRequest<Kepler::Map >(Kepler::Map  &,Kepler::Map  &);
 
 // template HttpClient &HttpClient::setConnectionData<DB::HashedDatabaseValues>(DB::HashedDatabaseValues &);
 // template HttpClient &HttpClient::setConnectionData<DB::DatabaseValues>(DB::DatabaseValues &);

@@ -8,7 +8,7 @@
 namespace asio = boost::asio;
 namespace beast = boost::beast;
 namespace http = beast::http;
-namespace json = boost::json;
+// namespace json = boost::json;
 using tcp = asio::ip::tcp;
 
 namespace Kepler
