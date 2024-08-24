@@ -19,11 +19,7 @@ if (USE_KEPLER_STATIC)
     set(BOOST_ALL_DYN_LINK OFF)
     set(BUILD_STATIC_LIBS ON)
     set(BUILD_SHARED_LIBS OFF)
-    add_compile_options(
-        $<$<CONFIG:>:/MT> #---------|
-        $<$<CONFIG:Debug>:/MTd> #---|-- Statically link the runtime libraries
-        $<$<CONFIG:Release>:/MT> #--|
-    )
+    
     # set(VCPKG_TARGET_ARCHITECTURE x64)
     # set(VCPKG_CRT_LINKAGE static)
     # set(VCPKG_LIBRARY_LINKAGE static)
@@ -44,14 +40,12 @@ else()
   set(BUILD_STATIC_LIBS OFF)
     set(Boost_USE_STATIC_LIBS OFF)
     set(BOOST_ALL_DYN_LINK ON)
-    set(BOOST_RUNTIME_LINK "shared")
-    set(Boost_USE_STATIC_RUNTIME OFF)
     set(BUILD_SHARED_LIBS ON)
-    add_compile_options(
-        $<$<CONFIG:>:/MD>
-        $<$<CONFIG:Debug>:/MDd>
-        $<$<CONFIG:Release>:/MD>
-    )
+    # add_compile_options(
+    #     $<$<CONFIG:>:/MD>
+    #     $<$<CONFIG:Debug>:/MDd>
+    #     $<$<CONFIG:Release>:/MD>
+    # )
     # if (WIN32)
     #   set(VCPKG_TARGET_TRIPLET "x64-windows" CACHE STRING "VCPKG Target Triplet to use")
     # elseif(UNIX)
@@ -69,10 +63,21 @@ else()
 endif()
 
 if (USE_RUNTIME_STATIC)
+  add_compile_options(
+    $<$<CONFIG:>:/MT> #---------|
+    $<$<CONFIG:Debug>:/MTd> #---|-- Statically link the runtime libraries
+    $<$<CONFIG:Release>:/MT> #--|
+  )
   set(BOOST_RUNTIME_LINK "static")
   set(Boost_USE_STATIC_RUNTIME ON)
 else()
-
+  add_compile_options(
+    $<$<CONFIG:>:/MD> #---------|
+    $<$<CONFIG:Debug>:/MDd> #---|-- Dynamically link the runtime libraries
+    $<$<CONFIG:Release>:/MD> #--|
+  )
+  set(BOOST_RUNTIME_LINK "shared")
+  set(Boost_USE_STATIC_RUNTIME OFF)
 endif()
 
 # if (MSVC)
