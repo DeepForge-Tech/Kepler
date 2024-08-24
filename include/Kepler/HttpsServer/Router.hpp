@@ -5,7 +5,7 @@
 #include <HttpsServer/HttpsResponse.hpp>
 #include <HttpsServer/Middleware.hpp>
 
-using RequestHandler = std::function<HttpResponse(const HttpRequest&)>;
+using RequestHandler = std::function<void(const Kepler::HttpRequest&, Kepler::HttpResponse&)>;
 
 class Router {
 public:

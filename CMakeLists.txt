@@ -1,32 +1,101 @@
 cmake_minimum_required(VERSION 3.18)
-if (WIN32)
-set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
+option(USE_KEPLER_STATIC "Build static library" ON)
+option(USE_RUNTIME_STATIC "Build static runtime" ON)
+# set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
+set(ARCHITECTURE)
+message("${CMAKE_SYSTEM_PROCESSOR}")
+# if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "x86_64")
+#   set(ARCHITECTURE "x64")
+# else(${CMAKE_SYSTEM_PROCESSOR} MATCHES "aarch64")
+#   message("2")
+# else()
+#   message(FATAL_ERROR "Unknown System Architecture: ${CMAKE_SYSTEM_PROCESSOR}")
+# endif()
 # set(VCPKG_CRT_LINKAGE static)
 # set(VCPKG_LIBRARY_LINKAGE static)
-set(VCPKG_TARGET_TRIPLET "x64-windows-static" CACHE STRING "VCPKG Target Triplet to use")
-endif()
-# set(BOOST_ROOT "C:/Boost/")
-
-if (MSVC)
-# set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
-# set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
-  set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedStatic")
-  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
-  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
-endif()
-if(MSVC)
+if (USE_KEPLER_STATIC)
+    set(BOOST_ROOT "C:/Library/lib/boost-static-lib/")
+    set(Boost_USE_STATIC_LIBS ON)
+    set(BOOST_ALL_DYN_LINK OFF)
+    set(BUILD_STATIC_LIBS ON)
+    set(BUILD_SHARED_LIBS OFF)
     add_compile_options(
         $<$<CONFIG:>:/MT> #---------|
         $<$<CONFIG:Debug>:/MTd> #---|-- Statically link the runtime libraries
         $<$<CONFIG:Release>:/MT> #--|
     )
+    # set(VCPKG_TARGET_ARCHITECTURE x64)
+    # set(VCPKG_CRT_LINKAGE static)
+    # set(VCPKG_LIBRARY_LINKAGE static)
+    # if(APPLE)
+    #   set(VCPKG_CMAKE_SYSTEM_NAME Darwin)
+    # elseif(UNIX)
+    #   set(VCPKG_CMAKE_SYSTEM_NAME Linux)
+    # endif()
+    # if (WIN32)
+    #   set(VCPKG_TARGET_TRIPLET "x64-windows-static" CACHE STRING "VCPKG Target Triplet to use")
+    # elseif(UNIX)
+    #   set(VCPKG_TARGET_TRIPLET "x64-linux" CACHE STRING "VCPKG Target Triplet to use")
+    # elseif(APPLE)
+    #   set(VCPKG_TARGET_TRIPLET "x64-linux" CACHE STRING "VCPKG Target Triplet to use")
+    # endif()
+else()
+  set(BOOST_ROOT "C:/Library/boost-dynamic-lib/")
+  set(BUILD_STATIC_LIBS OFF)
+    set(Boost_USE_STATIC_LIBS OFF)
+    set(BOOST_ALL_DYN_LINK ON)
+    set(BOOST_RUNTIME_LINK "shared")
+    set(Boost_USE_STATIC_RUNTIME OFF)
+    set(BUILD_SHARED_LIBS ON)
+    add_compile_options(
+        $<$<CONFIG:>:/MD>
+        $<$<CONFIG:Debug>:/MDd>
+        $<$<CONFIG:Release>:/MD>
+    )
+    # if (WIN32)
+    #   set(VCPKG_TARGET_TRIPLET "x64-windows" CACHE STRING "VCPKG Target Triplet to use")
+    # elseif(UNIX)
+    #   set(VCPKG_TARGET_TRIPLET "x64-linux-dynamic" CACHE STRING "VCPKG Target Triplet to use")
+    # elseif(APPLE)
+    #   set(VCPKG_TARGET_TRIPLET "x64-linux-dynamic" CACHE STRING "VCPKG Target Triplet to use")
+    # endif()
+    # set(VCPKG_CRT_LINKAGE dynamic)
+    # set(VCPKG_LIBRARY_LINKAGE dynamic)
+    # if(APPLE)
+    #   set(VCPKG_CMAKE_SYSTEM_NAME Darwin)
+    # elseif(UNIX)
+    #   set(VCPKG_CMAKE_SYSTEM_NAME Linux)
+    # endif()
 endif()
+
+if (USE_RUNTIME_STATIC)
+  set(BOOST_RUNTIME_LINK "static")
+  set(Boost_USE_STATIC_RUNTIME ON)
+else()
+
+endif()
+
+# if (MSVC)
+# # set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD")
+# # set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd")
+#   set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedStatic")
+#   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
+#   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
+# endif()
+# if(MSVC)
+#     add_compile_options(
+#         $<$<CONFIG:>:/MT> #---------|
+#         $<$<CONFIG:Debug>:/MTd> #---|-- Statically link the runtime libraries
+#         $<$<CONFIG:Release>:/MT> #--|
+#     )
+# endif()
 project(Kepler)
 
 add_definitions(-D_WIN32_WINNT=0x0601)
 # cmake_policy(SET CMP0144 NEW)
 # cmake_policy(SET CMP0135 NEW)
 set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include(GNUInstallDirs)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
@@ -48,21 +117,40 @@ set(HTTP_SERVER_LIBRARIES)
 set(WEBCLIENT_LIBRARIES)
 set(LIBRARIES)
 
+# set(Boost_NO_SYSTEM_PATHS ON)
+# set(Boost_USE_MULTITHREADED ON)
+# set(Boost_USE_DEBUG_LIBS OFF)
+# set(Boost_USE_RELEASE_LIBS ON)
+
+set(BOOST_INCLUDE_LIBRARIES system coroutine context asio beast)
+set(BOOST_ENABLE_CMAKE ON)
+
+include(FetchContent)
+FetchContent_Declare(
+  Boost
+  GIT_REPOSITORY https://github.com/boostorg/boost.git
+  GIT_PROGRESS TRUE
+  GIT_TAG boost-1.84.0
+  GIT_SHALLOW 1
+)
+FetchContent_MakeAvailable(Boost)
+
+include_directories(${BOOST_LIBRARY_INCLUDES})
+include_directories(asio INTERFACE ${boost_asio_SOURCE_DIR}/include)
+include_directories(coroutine INTERFACE ${boost_coroutine_SOURCE_DIR}/include)
+include_directories(system INTERFACE ${boost_system_SOURCE_DIR}/include)
+include_directories(context INTERFACE ${boost_context_SOURCE_DIR}/include)
+include_directories(beast INTERFACE ${boost_beast_SOURCE_DIR}/include)
+# Add source to this project's executable.
+# add_executable (ComUdpProxy "ComUdpProxy.cpp" "ComUdpProxy.h" "Sender.h"  "Receiver.h" "Message.h")
+
+#target_include_directories(ComUdpProxy PRIVATE ${BOOST_LIBRARY_INCLUDES})
+
 message("Use libraries for HTTP - ${USE_HTTP}")
 if (USE_HTTP)
-  
-  set (Boost_NO_SYSTEM_PATHS ON)
-  set (Boost_USE_MULTITHREADED ON)
-  set (Boost_USE_STATIC_LIBS ON)
-  set (BOOST_ALL_DYN_LINK OFF)
-  # set(Boost_USE_STATIC_LIBS        ON)  # only find static libs
-  # set(Boost_USE_DEBUG_LIBS        OFF)  # ignore debug libs and
-  # set(Boost_USE_RELEASE_LIBS       ON)  # only find release libs
-  # set(Boost_USE_MULTITHREADED      ON)
-  # set(Boost_USE_STATIC_RUNTIME     ON)
-  find_package(Boost REQUIRED COMPONENTS system coroutine context)
+  # find_package(Boost REQUIRED COMPONENTS system coroutine context asio beast)
 
-  include_directories(${Boost_INCLUDE_DIRS})
+  # include_directories(${Boost_INCLUDE_DIRS})
   list(APPEND HTTP_SERVER_SOURCE_FILES
     src/HttpServer/DefaultMiddlewares.cpp
     src/HttpServer/HttpRequest.cpp
@@ -73,19 +161,17 @@ if (USE_HTTP)
     src/HttpServer/Session.cpp
   )
   list(APPEND SOURCE_FILES ${HTTP_SERVER_SOURCE_FILES})
-  list(APPEND HTTP_SERVER_LIBRARIES  ${Boost_LIBRARIES} Logger)
+  list(APPEND HTTP_SERVER_LIBRARIES  Boost::asio Boost::system Boost::context Boost::coroutine Boost::beast Logger)
   list(APPEND LIBRARIES ${HTTP_SERVER_LIBRARIES})
 endif()
 
 if (USE_WEBCLIENT)
-  set (Boost_NO_SYSTEM_PATHS ON)
-  set (Boost_USE_MULTITHREADED ON)
-  set (Boost_USE_STATIC_LIBS ON)
-  set (BOOST_ALL_DYN_LINK OFF)
   find_package(OpenSSL REQUIRED)
-  find_package(Boost REQUIRED COMPONENTS system coroutine context)
-  list(APPEND WEBCLIENT_SOURCE_FILES src/WebClient/WebClient.cpp src/HttpClient/HttpClient.cpp src/HttpsClient/HttpsClient.cpp)
-  list(APPEND LIBRARIES ${Boost_LIBRARIES} OpenSSL::SSL OpenSSL::Crypto cppcoro)
+  # find_package(Boost REQUIRED COMPONENTS system coroutine context asio beast)
+  # find_package(cppcoro REQUIRED)
+  # include_directories(${Boost_INCLUDE_DIRS})
+  list(APPEND WEBCLIENT_SOURCE_FILES src/WebClient/WebClient.cpp src/HttpClient/HttpClient.cpp)
+  list(APPEND LIBRARIES cppcoro Boost::asio Boost::system Boost::context Boost::coroutine Boost::beast OpenSSL::SSL OpenSSL::Crypto)
   list(APPEND SOURCE_FILES ${WEBCLIENT_SOURCE_FILES})
 endif()
 
@@ -104,22 +190,32 @@ endif()
 #     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 #     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_CXX_FLAGS} -I /usr/local/include -I ../../include -DCURL_STATICLIB -Bstatic")
 # endif ()
-
+# find_package(jsoncpp REQUIRED)
+# find_package(fmt REQUIRED)
 list(APPEND LIBRARIES fmt jsoncpp_static)
 
+if (USE_KEPLER_STATIC)
+  # list(APPEND fmt_static jsoncpp_static)
+  add_library(Kepler STATIC
+    ${SOURCE_FILES}
+  )
+else()
+  # list(APPEND fmt_shared jsoncpp_shared)
+  add_library(Kepler SHARED
+    ${SOURCE_FILES}
+  )
+endif()
 # if (BUILD_SHARED_LIBS)
 #     add_library(Kepler SHARED
 #       ${HTTP_SERVER_SOURCE_FILES}
 #       # src/main.cpp
 #     )
 # else()
-# add_library(Kepler SHARED
-#   ${HTTP_SERVER_SOURCE_FILES}
-# )
 
-add_library(Kepler_static STATIC
-  ${SOURCE_FILES}
+target_link_libraries(Kepler
+  ${LIBRARIES}
 )
+
 # endif()
 # set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 # set_property(TARGET Kepler PROPERTY POSITION_INDEPENDENT_CODE ON)
@@ -129,9 +225,7 @@ add_library(Kepler_static STATIC
 #     fmt
 #   )
 # target_compile_features(Kepler PRIVATE cxx_std_20)
-target_link_libraries(Kepler_static 
-  ${LIBRARIES}
-)
+
 # set_target_properties(Kepler_static PROPERTIES
 #   LINK_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /NODEFAULTLIB:LIBCMTD"
 # )
@@ -148,6 +242,5 @@ target_link_libraries(Kepler_static
 # add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/examples)
 # endif()
 
-
 add_executable(MultithreadHttpServer examples/MultithreadHttpServer/src/main.cpp)
-target_link_libraries(MultithreadHttpServer jsoncpp_static Kepler_static)
+target_link_libraries(MultithreadHttpServer jsoncpp_static Kepler)

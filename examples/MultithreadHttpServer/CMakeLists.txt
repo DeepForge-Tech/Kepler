@@ -25,4 +25,4 @@ include(FetchContent)
 # FetchContent_MakeAvailable(Kepler)
 endif()
 
-target_link_libraries(${PROJECT_NAME} PRIVATE Kepler_static)
+target_link_libraries(${PROJECT_NAME} PRIVATE jsoncpp_static Kepler_static)

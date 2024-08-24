@@ -5,7 +5,7 @@
 #include <HttpsServer/Router.hpp>
 #include <boost/asio/ssl.hpp>
 
-namespace asio = boost::asio;
+using asio = boost::asio;
 using tcp = asio::ip::tcp;
 
 class HttpsServer {

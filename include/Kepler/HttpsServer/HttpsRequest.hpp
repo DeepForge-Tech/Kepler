@@ -3,7 +3,7 @@
 
 #include <Kepler/HttpsServer/Advanced.hpp>
 
-namespace http = boost::beast::http;
+namespace http  boost::beast::http;
 
 class HttpRequest {
 public:
