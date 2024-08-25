@@ -44,9 +44,9 @@ FetchContent_MakeAvailable(cppcoro)
  GIT_REPOSITORY https://github.com/DeepForge-Technology/jsoncpp.git
  GIT_TAG master
 )
-# if(NOT jsoncpp_POPULATED)
+# if (NOT jsoncpp_POPULATED)
 #   FetchContent_Populate(jsoncpp)
 #   add_subdirectory(${jsoncpp_SOURCE_DIR} ${jsoncpp_BINARY_DIR})
-# endif()
+# endif ()
 FetchContent_MakeAvailable(jsoncpp)
 
