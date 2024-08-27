@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.18)
-cmake_policy(SET CMP0144 NEW)
+if(CMAKE_VERSION GREATER 3.27)
+  cmake_policy(SET CMP0144 NEW)
+endif()
 option(USE_KEPLER_STATIC "Build static library" OFF)
 option(USE_RUNTIME_STATIC "Build static runtime" OFF)
 option(USE_HTTP "Use libraries for HTTP" ON)
