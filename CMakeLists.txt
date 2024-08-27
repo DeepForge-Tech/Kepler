@@ -11,6 +11,7 @@ if (USE_KEPLER_STATIC)
   if (WIN32)
     set(BOOST_ROOT "C:\\Libraries\\lib\\boost-static")
   elseif(UNIX)
+    set(BOOST_ROOT "/usr/local/Libraries/lib/boost-static")
   elseif(APPLE)
   endif()
   set(Boost_USE_STATIC_LIBS ON)
@@ -22,7 +23,7 @@ else()
   if (WIN32)
     set(BOOST_ROOT "C:\\Libraries\\lib\\boost-shared")
   elseif(UNIX)
-
+    set(BOOST_ROOT "/usr/local/Libraries/lib/boost-shared")
   elseif(APPLE)
   endif()
   set(BUILD_STATIC_LIBS OFF)
@@ -92,12 +93,10 @@ endif()
 project(Kepler)
 
 add_definitions(-D_WIN32_WINNT=0x0601)
-# cmake_policy(SET CMP0144 NEW)
-# cmake_policy(SET CMP0135 NEW)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include(GNUInstallDirs)
-# set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/CPM.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/DownloadDependecies.cmake)
@@ -155,13 +154,6 @@ CPMAddPackage(
   CMAKE_ARGS -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS}
 )
 
-CPMAddPackage(
-  NAME         openssl
-  GITHUB_REPOSITORY DeepForge-Tech/openssl-cmake
-  VERSION      1.1
-  CMAKE_ARGS -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS}
-)
-
 message("Use libraries for HTTP - ${USE_HTTP}")
 if (USE_HTTP)
   find_package(Boost REQUIRED COMPONENTS system coroutine context asio beast)
@@ -184,10 +176,21 @@ endif()
 if (USE_WEBCLIENT)
   # find_package(OpenSSL REQUIRED)
   find_package(Boost REQUIRED COMPONENTS system coroutine context asio beast)
-  # find_package(cppcoro REQUIRED)
   include_directories(${Boost_INCLUDE_DIRS})
   list(APPEND WEBCLIENT_SOURCE_FILES src/WebClient/WebClient.cpp src/HttpClient/HttpClient.cpp src/HttpsClient/HttpsClient.cpp)
-  list(APPEND WEBCLIENT_LIBRARIES Boost::asio Boost::system Boost::context Boost::coroutine Boost::beast ssl crypto)
+  list(APPEND WEBCLIENT_LIBRARIES Boost::asio Boost::system Boost::context Boost::coroutine Boost::beast)
+  if (WIN32)
+    CPMAddPackage(
+      NAME         openssl
+      GITHUB_REPOSITORY DeepForge-Tech/openssl-cmake
+      VERSION      1.1
+      CMAKE_ARGS -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS}
+    )
+    list(APPEND WEBCLIENT_LIBRARIES ssl crypto)
+  else()
+    find_package(OpenSSL REQUIRED)
+    list(APPEND WEBCLIENT_LIBRARIES OpenSSL::SSL OpenSSL::Crypto)
+  endif()
   if (USE_KEPLER_STATIC)
     list(APPEND WEBCLIENT_LIBRARIES cppcoro)
   else()
@@ -197,13 +200,8 @@ if (USE_WEBCLIENT)
   list(APPEND LIBRARIES ${WEBCLIENT_LIBRARIES})
 endif()
 
-
-# find_package(jsoncpp REQUIRED)
-# find_package(fmt REQUIRED)
 list(APPEND LIBRARIES fmt jsoncpp_lib)
-# list(APPEND LIBRARIES jsoncpp_lib)
 if (USE_KEPLER_STATIC)
-  # list(APPEND LIBRARIES jsoncpp_static)
   add_library(Kepler STATIC
     ${SOURCE_FILES}
   )
@@ -217,7 +215,6 @@ else()
   )
   include(GenerateExportHeader)
   generate_export_header(Kepler)
-  set_target_properties(Kepler PROPERTIES POSITION_INDEPENDENT_CODE ${BUILD_SHARED_LIBS})
   target_link_libraries(Kepler
     ${LIBRARIES}
   )
@@ -231,5 +228,4 @@ endif()
 # endif()
 
 add_executable(MultithreadHttpServer examples/MultithreadHttpServer/src/main.cpp)
-# set_target_properties(MultithreadHttpServer PROPERTIES POSITION_INDEPENDENT_CODE ${BUILD_SHARED_LIBS})
 target_link_libraries(MultithreadHttpServer jsoncpp_lib Kepler)
