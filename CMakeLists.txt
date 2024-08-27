@@ -155,6 +155,9 @@ CPMAddPackage(
   VERSION      1.9.5
   CMAKE_ARGS -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS}
 )
+if (cppcoro_ADDED)
+  include_directories(${cppcoro_SOURCE_DIR}/include)
+endif()
 
 message("Use libraries for HTTP - ${USE_HTTP}")
 if (USE_HTTP)
