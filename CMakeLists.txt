@@ -93,11 +93,14 @@ else()
 endif()
 
 project(Kepler)
-
-add_definitions(-D_WIN32_WINNT=0x0601)
+if (WIN32)
+  add_definitions(-D_WIN32_WINNT=0x0601)
+endif()
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-include(GNUInstallDirs)
+if(UNIX OR APPLE)
+  include(GNUInstallDirs)
+endif()
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/CPM.cmake)
